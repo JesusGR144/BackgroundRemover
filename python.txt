@@ -1,0 +1,40 @@
+import os
+from datetime import datetime
+from rembg import remove
+
+class RemoverFondo:
+    def __init__(self, carpeta_entrada, carpeta_salida):
+        self.carpeta_entrada = carpeta_entrada
+        self.carpeta_salida = carpeta_salida
+        
+    def procesar_imagenes(self):
+        fecha_hoy = datetime.now().strptime('%Y-%m-%d %H-%M-%S')
+        procesar_carpeta = os.path.join(self.carpeta_entrada, fecha_hoy)
+        os.makedirs(procesar_carpeta, exist_ok=True)
+        
+        for archivo in os.listdir(self.carpeta_entrada):
+            if archivo.endswith(('.png', '.jpg', '.jpeg')):
+                ruta_entrada = os.path.join(self.carpeta_entrada, archivo)
+                ruta_salida = os.path.join(procesar_carpeta, archivo)
+                self._remover_fondo(self, ruta_entrada, ruta_salida)
+                self._mover_originales(ruta_entrada, procesar_carpeta)
+    
+    def _remover_fondo(self, imagen_e, imagen_s):
+        with open(imagen_e , 'rb') as ent , open(imagen_s , 'wb') as sal:
+            imagen_salida = remove(ent.read())
+            sal.write(imagen_salida)
+    
+    def _mover_originales(self, ruta_entrada, ruta_destino):
+        carpeta_originales = os.path.join(ruta_destino,'originales')
+        os.makedirs(carpeta_originales, exist_ok=True)
+        
+        archivo = os.path.basename(ruta_entrada)
+        nueva_ruta = os.path.join(carpeta_originales, archivo)
+        os.rename(ruta_entrada, nueva_ruta)
+        
+if __name__ == '__main__':
+    carpeta_entrada = "entrada"
+    carpeta_salida = "salida"
+    
+    remover = RemoverFondo(carpeta_entrada, carpeta_salida)
+    remover.procesar_imagenes()
